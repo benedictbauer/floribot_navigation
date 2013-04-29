@@ -1,0 +1,17 @@
+<package>
+  <description brief="floribot_naviagtion">
+
+     floribot_naviagtion
+
+  </description>
+  <author>Benedict</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/floribot_naviagtion</url>
+  <depend package="std_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="roscpp"/>
+
+</package>
+
+

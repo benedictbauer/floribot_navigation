@@ -1,0 +1,16 @@
+<package>
+  <description brief="floribot_stage">
+
+     floribot_stage
+
+  </description>
+  <author>Benedict</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/floribot_stage</url>
+  <depend package="std_msgs"/>
+  <depend package="roscpp"/>
+
+</package>
+
+
