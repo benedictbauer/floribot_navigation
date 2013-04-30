@@ -87,11 +87,11 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 
 	printf("%f \n",y);
 
-	if (y < -0.025)
+	if (y < -0.05)
 	{
 		angular = -0.25;
 	}
-	else if (y >= -0.025 && y <= 0.025)
+	else if (y >= -0.05 && y <= 0.05)
 	{
 		angular = 0.0;
 	}
