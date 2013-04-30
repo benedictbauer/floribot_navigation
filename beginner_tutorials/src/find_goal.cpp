@@ -113,12 +113,10 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 
 	if (y_r == 0 && y_l == 0)
 	{
-		for (count = 0; count < 500; count++)
-		{
-			ros::Duration(1);
-			linear = 0.5;
-			angular = 10;
-		}
+
+		linear = 0.5;
+		angular = 10;
+
 	}
 
 
