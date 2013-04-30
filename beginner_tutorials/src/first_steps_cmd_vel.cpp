@@ -5,8 +5,7 @@
  *      Author: benedict
  */
 
-// Blubb
-// änderung
+
 
 
 #include <ros/ros.h>
