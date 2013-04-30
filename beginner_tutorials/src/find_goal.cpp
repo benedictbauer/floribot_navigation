@@ -60,21 +60,38 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 		ranges[i] = scan->ranges[i];
 	}
 
-	float y = 0;
+	float y = 0, y_l = 0, y_r = 0;
+	int count_l = 0, count_r = 0;
 
 	for (int i = 0; i < num_ranges; i++)
 	{
 		if (ranges[i] < search_range)
 		{
-			y = y + (sin((i-(num_ranges/2)) * angle_increment) * ranges[i]);
+			if (i < num_ranges/2)
+			{
+				y_r += (sin((i-(num_ranges/2)) * angle_increment) * ranges[i]);
+				count_r++;
+			}
+			else
+			{
+				y_l += (sin((i-(num_ranges/2)) * angle_increment) * ranges[i]);
+				count_l++;
+			}
 		}
 	}
 
-	if (y < -2.5)
+	y_r /= count_r;
+	y_l /= count_l;
+
+	y = y_r + y_l;
+
+	printf("%f \n",y);
+
+	if (y < -0.025)
 	{
 		angular = -0.25;
 	}
-	else if (y >= -2.5 && y <= 2.5)
+	else if (y >= -0.025 && y <= 0.025)
 	{
 		angular = 0.0;
 	}
