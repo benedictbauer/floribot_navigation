@@ -2,19 +2,19 @@ include "floribot.inc"
 
 window
 (
-	size [400 400]
+	size [312 558]
 
 	# camera options
-	center [0 0]
-	rotate [0 0]
-	scale 100.0
+	center [9.406 6.000]
+	rotate [0.000 -90.000]
+	scale 23.939
 
 	# perspective camera options
-	pcam_loc [0 -4 2]
-	pcam_angle [70 0]
+	pcam_loc [0.000 -4.000 2.000]
+	pcam_angle [70.000 0.000]
 
 	# GUI options
-	show_data 0
+	show_data 1
 	show_flags 1
 	show_blocks 1
 	show_clock 1
