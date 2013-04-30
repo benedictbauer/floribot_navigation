@@ -17,29 +17,29 @@
 
 class FindGoal
 {
-	public:
-		FindGoal();
+public:
+	FindGoal();
 
-	private:
-		void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan);
-		void publish();
+private:
+	void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan);
+	void publish();
 
-		double linear;
-		double angular;
+	double linear;
+	double angular;
 
-		ros::NodeHandle n;
+	ros::NodeHandle n;
 
-		ros::Publisher vel_pub;
-		ros::Subscriber scan_sub;
+	ros::Publisher vel_pub;
+	ros::Subscriber scan_sub;
 
-		ros::Timer timer;
+	ros::Timer timer;
 
-		geometry_msgs::Twist last_published;
+	geometry_msgs::Twist last_published;
 };
 
 FindGoal::FindGoal():
-		linear(0.2),
-		angular(0)
+				linear(1),
+				angular(0)
 {
 	vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 	scan_sub = n.subscribe<sensor_msgs::LaserScan>("scan", 10, &FindGoal::scanCallback, this);
@@ -51,6 +51,7 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
 	int num_ranges = scan->ranges.size();
 	float angle_increment = scan->angle_increment;
+	float range_min = scan->range_min;
 
 	float search_range = 1.0;
 	float ranges[num_ranges];
@@ -80,8 +81,14 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 		}
 	}
 
-	y_r /= count_r;
-	y_l /= count_l;
+	if (count_r != 0)
+	{
+		y_r /= count_r;
+	}
+	if (count_l != 0)
+	{
+		y_l /= count_l;
+	}
 
 	y = y_r + y_l;
 
@@ -89,16 +96,31 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 
 	if (y < -0.05)
 	{
-		angular = -0.25;
+		angular = -1;
 	}
-	else if (y >= -0.05 && y <= 0.05)
+	else if ((y >= -0.1 && y <= 0.1))
 	{
 		angular = 0.0;
 	}
 	else
 	{
-		angular = 0.25;
+		angular = 1;
 	}
+
+	int count;
+
+	linear = 1;
+
+	if (y_r == 0 && y_l == 0)
+	{
+		for (count = 0; count < 500; count++)
+		{
+			ros::Duration(1);
+			linear = 0.5;
+			angular = 10;
+		}
+	}
+
 
 	geometry_msgs::Twist vel;
 
@@ -114,8 +136,8 @@ void FindGoal::publish()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "find_goal");
-  FindGoal find_goal;
+	ros::init(argc, argv, "find_goal");
+	FindGoal find_goal;
 
-  ros::spin();
+	ros::spin();
 }
