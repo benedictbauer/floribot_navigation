@@ -27,11 +27,6 @@ private:
 	double linear;
 	double angular;
 
-	float y;
-	float y_l;
-	float y_r;
-
-
 	ros::NodeHandle n;
 
 	ros::Publisher vel_pub;
@@ -43,50 +38,21 @@ private:
 };
 
 FindGoal::FindGoal():
-												linear(1),
-												angular(0),
-												y_l(0),
-												y_r(0)
+				linear(1),
+				angular(0)
 {
 	vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 	scan_sub = n.subscribe<sensor_msgs::LaserScan>("scan", 10, &FindGoal::scanCallback, this);
-
-	if (y_l == 0 && y_r == 0)
-	{
-
-		linear = 1;
-		angular = 0;
-
-		geometry_msgs::Twist vel;
-
-
-		vel.angular.z = angular;
-		vel.linear.x = linear;
-		last_published = vel;
-
-		timer = n.createTimer(ros::Duration(1), boost::bind(&FindGoal::publish, this));
-
-
-		linear = 0.3;
-		angular = 0.8;
-
-
-		vel.angular.z = angular;
-		vel.linear.x = linear;
-		last_published = vel;
-
-		timer = n.createTimer(ros::Duration(2), boost::bind(&FindGoal::publish, this));
-	}
 
 	timer = n.createTimer(ros::Duration(0.1), boost::bind(&FindGoal::publish, this));
 }
 
 void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
+	// Durch Reihe navigieren
 	int num_ranges = scan->ranges.size();
 	float angle_increment = scan->angle_increment;
 
-	float search_range = 1.0;
 	float ranges[num_ranges];
 
 	for (int i = 0; i < num_ranges; i++)
@@ -94,9 +60,9 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 		ranges[i] = scan->ranges[i];
 	}
 
-	int count_l = 0, count_r = 0;
-	y_r = 0;
-	y_l = 0;
+	float search_range = 1.0;
+	int count_r = 0, count_l = 0;
+	float y = 0, y_r = 0, y_l = 0;
 
 	for (int i = 0; i < num_ranges; i++)
 	{
@@ -115,22 +81,25 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 		}
 	}
 
-	if (count_r != 0)
+	if (count_r > 0)
 	{
 		y_r /= count_r;
 	}
-	if (count_l != 0)
+	if(count_l > 0)
 	{
 		y_l /= count_l;
 	}
 
+
 	y = y_r + y_l;
 
-	printf("%f \n",y);
+	printf("%f\n", y);
 
-	if (y < -0.05)
+	linear = 1;
+
+	if (y < -0.1)
 	{
-		angular = -1;
+		angular = -1.0;
 	}
 	else if ((y >= -0.1 && y <= 0.1))
 	{
@@ -138,20 +107,8 @@ void FindGoal::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 	}
 	else
 	{
-		angular = 1;
+		angular = 1.0;
 	}
-
-
-	linear = 1;
-
-	if (y_r == 0 && y_l == 0)
-	{
-
-		linear = 0.5;
-		angular = 10;
-
-	}
-
 
 	geometry_msgs::Twist vel;
 
