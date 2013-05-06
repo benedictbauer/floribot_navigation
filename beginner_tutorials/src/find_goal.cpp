@@ -26,7 +26,8 @@ private:
   void throughRow(const sensor_msgs::LaserScan::ConstPtr &scan);
   float calcFieldOfAttentionX(const sensor_msgs::LaserScan::ConstPtr &scan, float &searchRange, float &angleIncrement, int &numRanges, float &robotWidth, float &x);
   float calcFieldOfAttentionY(const sensor_msgs::LaserScan::ConstPtr &scan, float &searchRange, float &angleIncrement, int &numRanges, float &y, float &yr, float &yl);
-  void setVelocity(float &x, float &y, float &speed);
+  void decision(float &x, float &y, float &speed);
+  void setVelocety(bool &turnDirection);
 
 
   double linear;
@@ -62,12 +63,15 @@ void FindGoal::throughRow(const sensor_msgs::LaserScan::ConstPtr &scan)
 {
   // Durch Reihe navigieren
 
-  float searchRange = 1.0;
+
   int numRanges = scan->ranges.size();
   float angleIncrement = scan->angle_increment;
 
+  float searchRange = 1.0;
   float robotWidth = 0.5;
   float speed = 1.0;
+  bool turnDireciton = 0;
+
 
   float x = 0;
   float y = 0, yr = 0, yl = 0;
@@ -75,9 +79,16 @@ void FindGoal::throughRow(const sensor_msgs::LaserScan::ConstPtr &scan)
   x = this->calcFieldOfAttentionX(scan, searchRange, angleIncrement, numRanges, robotWidth, x);
   y = this->calcFieldOfAttentionY(scan, searchRange, angleIncrement, numRanges, y, yr, yl);
 
-  printf("x = %f, y = %f\n",x,y);
+  printf("x: %1.3f, y: %1.3f\n",x,y);
+ if (y!=0 && x > 0.3){
+   this->decision(x, y ,speed);
+ }
+  if (y==0 && x > 0.3){
+    //Wendemethode
+  }
 
-  this->setVelocity(x, y, speed);
+
+  this->setVelocety(turnDireciton);
 }
 
 float FindGoal::calcFieldOfAttentionX(const sensor_msgs::LaserScan::ConstPtr &scan, float &searchRange, float &angleIncrement, int &numRanges, float &robotWidth, float &x)
@@ -145,8 +156,9 @@ float FindGoal::calcFieldOfAttentionY(const sensor_msgs::LaserScan::ConstPtr &sc
   return y;
 }
 
-void FindGoal::setVelocity(float &x, float &y, float &speed)
+void FindGoal::decision(float &x, float &y, float &speed)
 {
+  /*
 
   if(x < 0.3) // Floribot stoppt
   {
@@ -161,7 +173,7 @@ void FindGoal::setVelocity(float &x, float &y, float &speed)
   {
     angular = -speed;
   }
-  else if (y >= -0.1 && y <= 0.1)
+  else if ((y >= -0.1 && y <= 0.1) && y!=0)
   {
     angular = 0.0;
   }
@@ -170,15 +182,53 @@ void FindGoal::setVelocity(float &x, float &y, float &speed)
     angular = speed;
   }
 
-
-  geometry_msgs::Twist vel;
-
   if (y == 0)
   {
+    linear = 0.3;
   }
+  */
+
+  float minX = 0.3, minY = 0.1;
+
+  if ((y >= -minY && y <= 0.1) && x > minX)      //Geradeaus Fahrt
+  {
+    linear = speed;
+    angular = 0.0;
+  }
+  if (y < -minY && x > minX)                     //vorwärts rechts
+  {
+    linear = speed;
+    angular = -speed;
+  }
+  if (y > minY && x > minX)                      //vortwärts links
+  {
+    linear = speed;
+    angular = speed;
+  }
+  if (y > minY && x <= minX)                      //rückwärts links
+  {
+    linear = -speed;
+    angular = speed;
+  }
+  if (y < -minY && x > minX)                      //rückwärts rechts
+  {
+    linear = -speed;
+    angular = -speed;
+  }
+  if (y >= -0.07 && y <= 0.07 && x < minX)       //anhalten
+  {
+    linear = 0;
+    angular = 0;
+  }
+}
+
+void FindGoal::setVelocety(bool &turnDirection)
+{
+  geometry_msgs::Twist vel;
 
   vel.angular.z = angular;
   vel.linear.x = linear;
+
   last_published = vel;
 }
 
