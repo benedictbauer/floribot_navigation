@@ -148,9 +148,9 @@ float FindGoal::calcFieldOfAttentionY(const sensor_msgs::LaserScan::ConstPtr &sc
 void FindGoal::setVelocity(float &x, float &y, float &speed)
 {
 
-  if(x < 0.3)
+  if(x < 0.3) // Floribot stoppt
   {
-    linear = 0.0;
+    linear = -speed;
   }
   else
   {
@@ -161,7 +161,7 @@ void FindGoal::setVelocity(float &x, float &y, float &speed)
   {
     angular = -speed;
   }
-  else if ((y >= -0.1 && y <= 0.1) && y != 0)
+  else if (y >= -0.1 && y <= 0.1)
   {
     angular = 0.0;
   }
